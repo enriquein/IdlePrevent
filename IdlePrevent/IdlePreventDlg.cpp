@@ -38,7 +38,7 @@ LRESULT CIdlePreventDlg::DoKeySending(WPARAM wparam, LPARAM lparam)
     iTimerCount++;
     if(iTimerCount >= RESET_COUNTER)
     {
-        keybd_event(VK_RSHIFT,0xB6, 0, 0); 
+        keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0); 
         iTimerCount = 0;
     }
     return 0;
@@ -51,16 +51,15 @@ void CIdlePreventDlg::OnTrayEnableTimer()
 
 void CIdlePreventDlg::ToggleTimer()
 {
-    // toggle state variable first
-    isTimerEnabled = !isTimerEnabled;
     if(isTimerEnabled)
     {
         KillTimer(UWM_TIMER);
     }
     else
     {
-        SetTimer(UWM_TIMER, 6000, NULL);
+        SetTimer(UWM_TIMER, 60000, NULL);
     }
+    isTimerEnabled = !isTimerEnabled;    
 }
 
 void CIdlePreventDlg::OnTrayExit()
