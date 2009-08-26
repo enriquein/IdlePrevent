@@ -27,6 +27,7 @@ protected:
     LRESULT DoKeySending(WPARAM wparam, LPARAM lparam);
     void OnTrayEnableTimer();
     void OnTrayOptions();
+    void OnTrayAbout();
     void OnTrayExit();
     void ShellIcon_Initialize();
     void ShellIcon_Terminate();
@@ -36,14 +37,15 @@ protected:
 protected:
 	HICON m_hIcon;
     void ToggleTrayMenu(const BOOL& bEnable);
+    void EnableTimer(const BOOL& bEnable);
     
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg LRESULT ShellIconCallback(WPARAM wParam, LPARAM lParam);
-    afx_msg LRESULT CIdlePreventDlg::GetTimeout(WPARAM wparam, LPARAM lparam);
-    afx_msg LRESULT CIdlePreventDlg::SetTimeout(WPARAM wparam, LPARAM lparam);
+    afx_msg LRESULT GetTimeout(WPARAM wparam, LPARAM lparam);
+    afx_msg LRESULT SetTimeout(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);

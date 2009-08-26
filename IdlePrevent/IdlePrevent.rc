@@ -99,6 +99,18 @@ BEGIN
     CONTROL         "minutes.",IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,99,9,31,11
 END
 
+IDD_ABOUTDLG DIALOGEX 0, 0, 167, 70
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "IdlePrevent 1.0"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Close",IDOK,58,48,50,14
+    LTEXT           "You are using IdlePrevent version 1.0 (32-bit).",IDC_LBLMAININFO,7,7,153,8
+    LTEXT           "For support, email dev@indiecodelabs.com",IDC_STATIC,7,21,146,8
+    LTEXT           "This program is free for use for any purpose.",IDC_STATIC,7,35,145,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -106,8 +118,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,0,0
- PRODUCTVERSION 0,5,0,0
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -124,12 +136,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Indie Code Labs"
             VALUE "FileDescription", "Idle Prevent"
-            VALUE "FileVersion", "0.5.0.0"
+            VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "IdlePrevent.exe"
             VALUE "LegalCopyright", "(C) 2008 Indie Code Labs"
             VALUE "OriginalFilename", "IdlePrevent.exe"
             VALUE "ProductName", "Idle Prevent"
-            VALUE "ProductVersion", "0.5.0.0"
+            VALUE "ProductVersion", "1.0.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -162,6 +174,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 39
     END
+
+    IDD_ABOUTDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 160
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -178,6 +198,7 @@ BEGIN
         MENUITEM "Enable",                      IDTRAY_ENABLE
         MENUITEM SEPARATOR
         MENUITEM "Options",                     IDTRAY_OPTIONS
+        MENUITEM "About...",                    IDTRAY_ABOUT
         MENUITEM SEPARATOR
         MENUITEM "Exit",                        IDTRAY_EXIT
     END

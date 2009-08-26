@@ -3,6 +3,7 @@
 #include "IdlePreventDlg.h"
 #include "Settings.h"
 #include "OptionsDlg.h"
+#include "AboutDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,7 +19,7 @@ CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
 {
     Settings s;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	isTimerEnabled = FALSE; // Set to false so the next toggle actually enables it.
+	isTimerEnabled = FALSE; // Initialize to false since we're not running a timer yet.
 	iTimeoutValue = s.iTimeoutInMinutes; 
 }
 
@@ -32,6 +33,7 @@ BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
 	ON_COMMAND(IDTRAY_ENABLE, OnTrayEnableTimer)
 	ON_COMMAND(IDTRAY_OPTIONS, OnTrayOptions)
 	ON_COMMAND(IDTRAY_EXIT, OnTrayExit)
+	ON_COMMAND(IDTRAY_ABOUT, OnTrayAbout)
 	//}}AFX_MSG_MAP
     ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
@@ -67,7 +69,38 @@ void CIdlePreventDlg::OnTrayOptions()
     OptionsDlg o((CWnd*) this);
     ToggleTrayMenu(FALSE);
     o.DoModal();
+    if(isTimerEnabled)
+    {
+        EnableTimer(TRUE); // Refreshing the timeout value.
+    }   
     ToggleTrayMenu(TRUE);
+}
+
+void CIdlePreventDlg::OnTrayAbout()
+{
+    AboutDlg abt((CWnd*) this);
+    ToggleTrayMenu(FALSE);
+    abt.DoModal();
+    ToggleTrayMenu(TRUE);
+}
+
+// The idea is that if the timer is already enabled, just
+// reset the timeout then to iTimeoutValue
+void CIdlePreventDlg::EnableTimer(const BOOL& bEnable)
+{
+    if(isTimerEnabled)
+    {
+        KillTimer(UWM_TIMER);
+    }
+    
+    if(bEnable)
+    {
+        // First convert value to seconds (*60) and then to milliseconds (*1000).
+        // Remember iTimeoutValue represents the minutes.
+        UINT milliseconds = iTimeoutValue * 60 * 1000;
+        SetTimer(UWM_TIMER, milliseconds, NULL);
+    }  
+    isTimerEnabled = bEnable;    
 }
 
 void CIdlePreventDlg::ToggleTrayMenu(const BOOL& bEnable)
@@ -93,18 +126,7 @@ void CIdlePreventDlg::OnTrayEnableTimer()
 
 void CIdlePreventDlg::ToggleTimer()
 {
-    if(isTimerEnabled)
-    {
-        KillTimer(UWM_TIMER);
-    }
-    else
-    {
-        // First convert value to seconds (*60) and then to milliseconds (*1000).
-        // Remember iTimeoutValue represents the minutes.
-        UINT milliseconds = iTimeoutValue * 60 * 1000;
-        SetTimer(UWM_TIMER, milliseconds, NULL);
-    }
-    isTimerEnabled = !isTimerEnabled;    
+    EnableTimer(!isTimerEnabled);  
 }
 
 void CIdlePreventDlg::OnTrayExit()
@@ -138,7 +160,7 @@ BOOL CIdlePreventDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
     mnuTray.LoadMenu(IDR_MENU1);
 	ShellIcon_Initialize();
-	ToggleTimer();
+	EnableTimer(TRUE);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 void CIdlePreventDlg::ShellIcon_Initialize()
@@ -150,7 +172,7 @@ void CIdlePreventDlg::ShellIcon_Initialize()
 	ni.uID = 1;
 	ni.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     ni.uCallbackMessage = UWM_SHELLICON_MSG;
-    ttipText = _T("IdlePrevent");
+    ttipText = _T("IdlePrevent 1.0");
     _tcscpy_s(ni.szTip, ttipText);
 	ni.hIcon = m_hIcon;
 	
