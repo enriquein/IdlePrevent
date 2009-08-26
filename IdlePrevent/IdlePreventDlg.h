@@ -14,16 +14,19 @@ public:
 // Dialog Data
 	enum { IDD = IDD_IDLEPREVENT_DIALOG };
 
-	protected:
+protected:
 	BOOL isTimerEnabled;
-	int iTimerCount;
 	CMenu mnuTray;
+	int iTimeoutValue;
 	void ToggleTimer();
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
     static UINT UWM_SHELLICON_MSG;
     static UINT UWM_TIMER;
+    static UINT UWM_SET_TIMEOUT;
+    static UINT UWM_GET_TIMEOUT;
     LRESULT DoKeySending(WPARAM wparam, LPARAM lparam);
     void OnTrayEnableTimer();
+    void OnTrayOptions();
     void OnTrayExit();
     void ShellIcon_Initialize();
     void ShellIcon_Terminate();
@@ -32,12 +35,15 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-
+    void ToggleTrayMenu(const BOOL& bEnable);
+    
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg LRESULT ShellIconCallback(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT CIdlePreventDlg::GetTimeout(WPARAM wparam, LPARAM lparam);
+    afx_msg LRESULT CIdlePreventDlg::SetTimeout(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);

@@ -1,9 +1,8 @@
-// IdlePreventDlg.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "IdlePrevent.h"
 #include "IdlePreventDlg.h"
+#include "Settings.h"
+#include "OptionsDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -11,15 +10,16 @@
 
 UINT CIdlePreventDlg::UWM_SHELLICON_MSG = ::RegisterWindowMessage(_T("UWM_SHELLICON_MSG-{8A439DA7-F0D7-4169-8705-6EDB93634399}"));
 UINT CIdlePreventDlg::UWM_TIMER = ::RegisterWindowMessage(_T("UWM_TIMER-{969EC4DA-9905-4f68-A015-F03FC6F428A3}"));
-#define RESET_COUNTER 5
+UINT CIdlePreventDlg::UWM_SET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_SET_TIMEOUT-{8BD7ED10-C815-4CDD-9452-DB0072CFC544}"));
+UINT CIdlePreventDlg::UWM_GET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_GET_TIMEOUT-{378232F3-538E-4488-943A-261905D3EADA}"));
 
-// CIdlePreventDlg dialog
 CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CIdlePreventDlg::IDD, pParent)
 {
+    Settings s;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	isTimerEnabled = FALSE; // Set to false so the next toggle actually enables it.
-	iTimerCount = 0; 
+	iTimeoutValue = s.iTimeoutInMinutes; 
 }
 
 BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
@@ -27,21 +27,63 @@ BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_MESSAGE(WM_TIMER, DoKeySending)
 	ON_REGISTERED_MESSAGE(UWM_SHELLICON_MSG, ShellIconCallback)
+	ON_REGISTERED_MESSAGE(UWM_SET_TIMEOUT, SetTimeout)
+	ON_REGISTERED_MESSAGE(UWM_GET_TIMEOUT, GetTimeout)
 	ON_COMMAND(IDTRAY_ENABLE, OnTrayEnableTimer)
+	ON_COMMAND(IDTRAY_OPTIONS, OnTrayOptions)
 	ON_COMMAND(IDTRAY_EXIT, OnTrayExit)
 	//}}AFX_MSG_MAP
     ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
 
+/*  lparam contains a pointer to the numeric value to use as timeout for our timer. 
+    sample call:
+    LRESULT lres = ::SendMessage(hWnd, UWM_GET_TIMEOUT, 0, 0);
+    int i = *(int*)lres;
+*/
+LRESULT CIdlePreventDlg::GetTimeout(WPARAM wparam, LPARAM lparam)
+{
+    return lparam = (LRESULT) &iTimeoutValue;
+}
+
+/* (int)wparam contains the numeric value to use as timeout for our timer. */
+LRESULT CIdlePreventDlg::SetTimeout(WPARAM wparam, LPARAM lparam)
+{
+    Settings s;
+    iTimeoutValue = (int)wparam;
+    s.iTimeoutInMinutes = iTimeoutValue;
+    s.WriteSettings();
+    return 0;
+}
+
 LRESULT CIdlePreventDlg::DoKeySending(WPARAM wparam, LPARAM lparam)
 {
-    iTimerCount++;
-    if(iTimerCount >= RESET_COUNTER)
-    {
-        keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0); 
-        iTimerCount = 0;
-    }
+    keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0); 
     return 0;
+}
+
+void CIdlePreventDlg::OnTrayOptions()
+{
+    OptionsDlg o((CWnd*) this);
+    ToggleTrayMenu(FALSE);
+    o.DoModal();
+    ToggleTrayMenu(TRUE);
+}
+
+void CIdlePreventDlg::ToggleTrayMenu(const BOOL& bEnable)
+{	
+	UINT lFlags;
+	if(bEnable)
+	{
+		lFlags = MF_BYCOMMAND|MF_ENABLED;
+	}
+	else
+	{
+		lFlags = MF_BYCOMMAND|MF_DISABLED|MF_GRAYED;
+	}
+	mnuTray.GetSubMenu(0)->EnableMenuItem(IDTRAY_OPTIONS, lFlags);
+	mnuTray.GetSubMenu(0)->EnableMenuItem(IDTRAY_EXIT, lFlags);
+	mnuTray.GetSubMenu(0)->EnableMenuItem(IDTRAY_ENABLE, lFlags);
 }
 
 void CIdlePreventDlg::OnTrayEnableTimer()
@@ -57,7 +99,10 @@ void CIdlePreventDlg::ToggleTimer()
     }
     else
     {
-        SetTimer(UWM_TIMER, 60000, NULL);
+        // First convert value to seconds (*60) and then to milliseconds (*1000).
+        // Remember iTimeoutValue represents the minutes.
+        UINT milliseconds = iTimeoutValue * 60 * 1000;
+        SetTimer(UWM_TIMER, milliseconds, NULL);
     }
     isTimerEnabled = !isTimerEnabled;    
 }
@@ -88,7 +133,7 @@ BOOL CIdlePreventDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// Set the icon for this dialog.  The framework does this automatically
-	//  when the application's main window is not a dialog
+	// when the application's main window is not a dialog
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
     mnuTray.LoadMenu(IDR_MENU1);

@@ -77,12 +77,26 @@ IDR_MAINFRAME           ICON                    "res\\IdlePrevent.ico"
 // Dialog
 //
 
-IDD_IDLEPREVENT_DIALOG DIALOGEX 0, 0, 81, 42
+IDD_IDLEPREVENT_DIALOG DIALOGEX 0, 0, 78, 33
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "IdlePrevent"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
+    LTEXT           "This window should be invisible.",IDC_STATIC,7,7,64,19
+END
+
+IDD_OPTIONSDLG DIALOGEX 0, 0, 137, 46
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,25,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,80,25,50,14
+    CONTROL         "Send signal every",IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,7,9,65,11
+    EDITTEXT        IDC_TXTTIMEOUT,65,7,31,12,ES_CENTER | ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "minutes.",IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,99,9,31,11
 END
 
 
@@ -92,8 +106,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,0,0
- PRODUCTVERSION 0,1,0,0
+ FILEVERSION 0,5,0,0
+ PRODUCTVERSION 0,5,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -110,12 +124,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Indie Code Labs"
             VALUE "FileDescription", "Idle Prevent"
-            VALUE "FileVersion", "0.1.0.0"
+            VALUE "FileVersion", "0.5.0.0"
             VALUE "InternalName", "IdlePrevent.exe"
             VALUE "LegalCopyright", "(C) 2008 Indie Code Labs"
             VALUE "OriginalFilename", "IdlePrevent.exe"
             VALUE "ProductName", "Idle Prevent"
-            VALUE "ProductVersion", "0.1.0.0"
+            VALUE "ProductVersion", "0.5.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -136,9 +150,17 @@ BEGIN
     IDD_IDLEPREVENT_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 74
+        RIGHTMARGIN, 71
         TOPMARGIN, 7
-        BOTTOMMARGIN, 35
+        BOTTOMMARGIN, 26
+    END
+
+    IDD_OPTIONSDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 130
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 39
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -155,7 +177,9 @@ BEGIN
     BEGIN
         MENUITEM "Enable",                      IDTRAY_ENABLE
         MENUITEM SEPARATOR
-        MENUITEM "Exit",                        32772
+        MENUITEM "Options",                     IDTRAY_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Exit",                        IDTRAY_EXIT
     END
 END
 
