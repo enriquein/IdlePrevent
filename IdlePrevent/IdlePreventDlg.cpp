@@ -13,6 +13,7 @@ UINT CIdlePreventDlg::UWM_SHELLICON_MSG = ::RegisterWindowMessage(_T("UWM_SHELLI
 UINT CIdlePreventDlg::UWM_TIMER = ::RegisterWindowMessage(_T("UWM_TIMER-{969EC4DA-9905-4f68-A015-F03FC6F428A3}"));
 UINT CIdlePreventDlg::UWM_SET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_SET_TIMEOUT-{8BD7ED10-C815-4CDD-9452-DB0072CFC544}"));
 UINT CIdlePreventDlg::UWM_GET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_GET_TIMEOUT-{378232F3-538E-4488-943A-261905D3EADA}"));
+UINT CIdlePreventDlg::UWM_TASKBAR_CREATED = ::RegisterWindowMessage(_T("TaskbarCreated"));
 
 CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CIdlePreventDlg::IDD, pParent)
@@ -26,10 +27,11 @@ CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
 BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_MESSAGE(WM_TIMER, DoKeySending)
+	ON_MESSAGE(WM_TIMER, SendWakeEvent)
 	ON_REGISTERED_MESSAGE(UWM_SHELLICON_MSG, ShellIconCallback)
 	ON_REGISTERED_MESSAGE(UWM_SET_TIMEOUT, SetTimeout)
 	ON_REGISTERED_MESSAGE(UWM_GET_TIMEOUT, GetTimeout)
+	ON_REGISTERED_MESSAGE(UWM_TASKBAR_CREATED, ShellIcon_Initialize)
 	ON_COMMAND(IDTRAY_ENABLE, OnTrayEnableTimer)
 	ON_COMMAND(IDTRAY_OPTIONS, OnTrayOptions)
 	ON_COMMAND(IDTRAY_EXIT, OnTrayExit)
@@ -58,9 +60,17 @@ LRESULT CIdlePreventDlg::SetTimeout(WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
-LRESULT CIdlePreventDlg::DoKeySending(WPARAM wparam, LPARAM lparam)
+LRESULT CIdlePreventDlg::SendWakeEvent(WPARAM wparam, LPARAM lparam)
 {
-    keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0); 
+    INPUT mouseInput[1];
+	mouseInput[0].mi.dx = 0;
+	mouseInput[0].mi.dy = 0;
+	mouseInput[0].mi.mouseData = 0;
+	mouseInput[0].mi.dwFlags = MOUSEEVENTF_MOVE;
+	mouseInput[0].mi.time = 0;
+	mouseInput[0].mi.dwExtraInfo = NULL;
+	SendInput(1, mouseInput, sizeof(mouseInput));
+	SetThreadExecutionState(ES_DISPLAY_REQUIRED);
     return 0;
 }
 
@@ -159,11 +169,11 @@ BOOL CIdlePreventDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
     mnuTray.LoadMenu(IDR_MENU1);
-	ShellIcon_Initialize();
+	ShellIcon_Initialize(0, 0);
 	EnableTimer(TRUE);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
-void CIdlePreventDlg::ShellIcon_Initialize()
+LRESULT CIdlePreventDlg::ShellIcon_Initialize(WPARAM wparam, LPARAM lparam)
 {
     CString ttipText;
 	NOTIFYICONDATA ni;
@@ -172,26 +182,12 @@ void CIdlePreventDlg::ShellIcon_Initialize()
 	ni.uID = 1;
 	ni.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     ni.uCallbackMessage = UWM_SHELLICON_MSG;
-    ttipText = _T("IdlePrevent 1.0");
+    ttipText = _T("IdlePrevent 1.1");
     _tcscpy_s(ni.szTip, ttipText);
 	ni.hIcon = m_hIcon;
 	
-    // We have to keep retrying because Shell_NotifyIcon usually fails during Windows startup
-    // on some machines with lots of other programs loading at startup as well.
-    // We'll give it 30 seconds to consider some older machines running AOL/Norton etc.
-	int iCount = 0;
-    int maxCount = 30;
-	while ( (Shell_NotifyIcon(NIM_ADD, &ni) && (iCount <= maxCount ) ) )
-	{
-        Sleep(1000);
-        iCount += 1;
-	}
-
-	if(iCount > maxCount)
-	{
-		MessageBox(_T("Error while trying to create the System Tray Icon.\nThe program will continue to run in the background."),
-					_T("IdlePrevent->ShellIcon_Initialize()"), MB_OK | MB_ICONINFORMATION);
-	}
+	Shell_NotifyIcon(NIM_ADD, &ni);
+	return 0;
 }
 
 void CIdlePreventDlg::ShellIcon_Terminate()

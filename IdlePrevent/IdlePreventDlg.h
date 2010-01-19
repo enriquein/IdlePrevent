@@ -24,12 +24,13 @@ protected:
     static UINT UWM_TIMER;
     static UINT UWM_SET_TIMEOUT;
     static UINT UWM_GET_TIMEOUT;
-    LRESULT DoKeySending(WPARAM wparam, LPARAM lparam);
+	static UINT UWM_TASKBAR_CREATED;
+    LRESULT SendWakeEvent(WPARAM wparam, LPARAM lparam);
     void OnTrayEnableTimer();
     void OnTrayOptions();
     void OnTrayAbout();
     void OnTrayExit();
-    void ShellIcon_Initialize();
+    LRESULT ShellIcon_Initialize(WPARAM wparam, LPARAM lparam);
     void ShellIcon_Terminate();
     void DoCleanup();
 
