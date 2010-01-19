@@ -62,16 +62,21 @@ LRESULT CIdlePreventDlg::SetTimeout(WPARAM wparam, LPARAM lparam)
 
 LRESULT CIdlePreventDlg::SendWakeEvent(WPARAM wparam, LPARAM lparam)
 {
-    INPUT mouseInput[1];
-	mouseInput[0].mi.dx = 0;
-	mouseInput[0].mi.dy = 0;
-	mouseInput[0].mi.mouseData = 0;
-	mouseInput[0].mi.dwFlags = MOUSEEVENTF_MOVE;
-	mouseInput[0].mi.time = 0;
-	mouseInput[0].mi.dwExtraInfo = NULL;
-	SendInput(1, mouseInput, sizeof(mouseInput));
-	SetThreadExecutionState(ES_DISPLAY_REQUIRED);
-    return 0;
+	HDESK test = OpenInputDesktop(DF_ALLOWOTHERACCOUNTHOOK, TRUE,DESKTOP_CREATEMENU | DESKTOP_CREATEWINDOW |DESKTOP_ENUMERATE | DESKTOP_HOOKCONTROL |DESKTOP_WRITEOBJECTS | DESKTOP_READOBJECTS |DESKTOP_SWITCHDESKTOP |GENERIC_WRITE);
+	if (test != NULL)
+	{
+		INPUT mouseInput[1];
+		mouseInput[0].mi.dx = 0;
+		mouseInput[0].mi.dy = 0;
+		mouseInput[0].mi.mouseData = 0;
+		mouseInput[0].mi.dwFlags = MOUSEEVENTF_MOVE;
+		mouseInput[0].mi.time = 0;
+		mouseInput[0].mi.dwExtraInfo = NULL;
+		SendInput(1, mouseInput, sizeof(mouseInput));
+		SetThreadExecutionState(ES_DISPLAY_REQUIRED);
+	}
+	CloseDesktop(test);
+	return 0;
 }
 
 void CIdlePreventDlg::OnTrayOptions()
