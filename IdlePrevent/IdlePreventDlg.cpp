@@ -11,8 +11,6 @@
 
 UINT CIdlePreventDlg::UWM_SHELLICON_MSG = ::RegisterWindowMessage(_T("UWM_SHELLICON_MSG-{8A439DA7-F0D7-4169-8705-6EDB93634399}"));
 UINT CIdlePreventDlg::UWM_TIMER = ::RegisterWindowMessage(_T("UWM_TIMER-{969EC4DA-9905-4f68-A015-F03FC6F428A3}"));
-UINT CIdlePreventDlg::UWM_SET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_SET_TIMEOUT-{8BD7ED10-C815-4CDD-9452-DB0072CFC544}"));
-UINT CIdlePreventDlg::UWM_GET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_GET_TIMEOUT-{378232F3-538E-4488-943A-261905D3EADA}"));
 UINT CIdlePreventDlg::UWM_TASKBAR_CREATED = ::RegisterWindowMessage(_T("TaskbarCreated"));
 
 CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
@@ -21,7 +19,8 @@ CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
     Settings s;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	isTimerEnabled = FALSE; // Initialize to false since we're not running a timer yet.
-	iTimeoutValue = s.iTimeoutInMinutes; 
+	timeoutValue = s.timeoutInMinutes; 
+	RDPFriendlyWakeEnabled = s.useRDPFriendlyWakeMethod;
 }
 
 BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
@@ -29,8 +28,6 @@ BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_MESSAGE(WM_TIMER, SendWakeEvent)
 	ON_REGISTERED_MESSAGE(UWM_SHELLICON_MSG, ShellIconCallback)
-	ON_REGISTERED_MESSAGE(UWM_SET_TIMEOUT, SetTimeout)
-	ON_REGISTERED_MESSAGE(UWM_GET_TIMEOUT, GetTimeout)
 	ON_REGISTERED_MESSAGE(UWM_TASKBAR_CREATED, ShellIcon_Initialize)
 	ON_COMMAND(IDTRAY_ENABLE, OnTrayEnableTimer)
 	ON_COMMAND(IDTRAY_OPTIONS, OnTrayOptions)
@@ -40,40 +37,28 @@ BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
     ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
 
-/*  lparam contains a pointer to the numeric value to use as timeout for our timer. 
-    sample call:
-    LRESULT lres = ::SendMessage(hWnd, UWM_GET_TIMEOUT, 0, 0);
-    int i = *(int*)lres;
-*/
-LRESULT CIdlePreventDlg::GetTimeout(WPARAM wparam, LPARAM lparam)
-{
-    return lparam = (LRESULT) &iTimeoutValue;
-}
-
-/* (int)wparam contains the numeric value to use as timeout for our timer. */
-LRESULT CIdlePreventDlg::SetTimeout(WPARAM wparam, LPARAM lparam)
-{
-    Settings s;
-    iTimeoutValue = (int)wparam;
-    s.iTimeoutInMinutes = iTimeoutValue;
-    s.WriteSettings();
-    return 0;
-}
-
 LRESULT CIdlePreventDlg::SendWakeEvent(WPARAM wparam, LPARAM lparam)
 {
+    // This ensures we only send wake events while the machine isn't locked. Seems Windows queues some events and sometimes they happen at once as soon as you unlock the computer.
 	HDESK test = OpenInputDesktop(DF_ALLOWOTHERACCOUNTHOOK, TRUE,DESKTOP_CREATEMENU | DESKTOP_CREATEWINDOW |DESKTOP_ENUMERATE | DESKTOP_HOOKCONTROL |DESKTOP_WRITEOBJECTS | DESKTOP_READOBJECTS |DESKTOP_SWITCHDESKTOP |GENERIC_WRITE);
 	if (test != NULL)
 	{
-		INPUT mouseInput[1];
-		mouseInput[0].mi.dx = 0;
-		mouseInput[0].mi.dy = 0;
-		mouseInput[0].mi.mouseData = 0;
-		mouseInput[0].mi.dwFlags = MOUSEEVENTF_MOVE;
-		mouseInput[0].mi.time = 0;
-		mouseInput[0].mi.dwExtraInfo = NULL;
-		SendInput(1, mouseInput, sizeof(mouseInput));
-		SetThreadExecutionState(ES_DISPLAY_REQUIRED);
+        if(RDPFriendlyWakeEnabled)
+        {      
+            INPUT mouseInput[1];
+            mouseInput[0].mi.dx = 0;
+            mouseInput[0].mi.dy = 0;
+            mouseInput[0].mi.mouseData = 0;
+            mouseInput[0].mi.dwFlags = MOUSEEVENTF_MOVE;
+            mouseInput[0].mi.time = 0;
+            mouseInput[0].mi.dwExtraInfo = NULL;
+            SendInput(1, mouseInput, sizeof(mouseInput));
+            SetThreadExecutionState(ES_DISPLAY_REQUIRED);
+        }
+        else
+        {
+            keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0);
+        }
 	}
 	CloseDesktop(test);
 	return 0;
@@ -112,7 +97,7 @@ void CIdlePreventDlg::EnableTimer(const BOOL& bEnable)
     {
         // First convert value to seconds (*60) and then to milliseconds (*1000).
         // Remember iTimeoutValue represents the minutes.
-        UINT milliseconds = iTimeoutValue * 60 * 1000;
+        UINT milliseconds = timeoutValue * 60 * 1000;
         SetTimer(UWM_TIMER, milliseconds, NULL);
     }  
     isTimerEnabled = bEnable;    
@@ -187,7 +172,7 @@ LRESULT CIdlePreventDlg::ShellIcon_Initialize(WPARAM wparam, LPARAM lparam)
 	ni.uID = 1;
 	ni.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     ni.uCallbackMessage = UWM_SHELLICON_MSG;
-    ttipText = _T("IdlePrevent 1.1");
+    ttipText = _T("IdlePrevent 1.2");
     _tcscpy_s(ni.szTip, ttipText);
 	ni.hIcon = m_hIcon;
 	
@@ -218,33 +203,9 @@ LRESULT CIdlePreventDlg::ShellIconCallback(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-// If you add a minimize button to your dialog, you will need the code below
-//  to draw the icon.  For MFC applications using the document/view model,
-//  this is automatically done for you by the framework.
-
 void CIdlePreventDlg::OnPaint()
 {
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // device context for painting
-
-		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
-
-		// Center icon in client rectangle
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
-
-		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
-		CDialog::OnPaint();
-	}
+	CDialog::OnPaint();
 }
 
 // The system calls this function to obtain the cursor to display while the user drags
@@ -254,7 +215,7 @@ HCURSOR CIdlePreventDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
+// Makes sure the window starts up invisible.
 void CIdlePreventDlg::OnWindowPosChanging(WINDOWPOS* lpwndpos)
 {
     lpwndpos->flags &= ~SWP_SHOWWINDOW;

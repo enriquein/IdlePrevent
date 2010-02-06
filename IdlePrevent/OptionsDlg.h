@@ -14,8 +14,7 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-    static UINT UWM_SET_TIMEOUT;
-    static UINT UWM_GET_TIMEOUT;
+    void SaveSettings(int timeout, BOOL RDPFriendlyWakeMethod);
     
 	DECLARE_MESSAGE_MAP()
 public:
@@ -23,4 +22,5 @@ public:
     virtual BOOL OnInitDialog();
     afx_msg void OnBnClickedOk();
     afx_msg void OnBnClickedCancel();
+    CButton chkUseRDPFriendlyMethod;
 };

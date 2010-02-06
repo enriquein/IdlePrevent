@@ -17,13 +17,12 @@ public:
 protected:
 	BOOL isTimerEnabled;
 	CMenu mnuTray;
-	int iTimeoutValue;
+	int timeoutValue;
+	BOOL RDPFriendlyWakeEnabled;
 	void ToggleTimer();
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
     static UINT UWM_SHELLICON_MSG;
     static UINT UWM_TIMER;
-    static UINT UWM_SET_TIMEOUT;
-    static UINT UWM_GET_TIMEOUT;
 	static UINT UWM_TASKBAR_CREATED;
     LRESULT SendWakeEvent(WPARAM wparam, LPARAM lparam);
     void OnTrayEnableTimer();
@@ -45,8 +44,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg LRESULT ShellIconCallback(WPARAM wParam, LPARAM lParam);
-    afx_msg LRESULT GetTimeout(WPARAM wparam, LPARAM lparam);
-    afx_msg LRESULT SetTimeout(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);

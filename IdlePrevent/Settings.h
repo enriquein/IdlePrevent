@@ -8,7 +8,8 @@ public:
     
     void ReadSettings();
 	void WriteSettings();
-	int iTimeoutInMinutes;
+	int timeoutInMinutes;
+	BOOL useRDPFriendlyWakeMethod;
 
 protected:
 	CString iniPath;

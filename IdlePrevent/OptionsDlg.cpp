@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "IdlePrevent.h"
 #include "OptionsDlg.h"
-
-UINT OptionsDlg::UWM_SET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_SET_TIMEOUT-{8BD7ED10-C815-4cdd-9452-DB0072CFC544}"));
-UINT OptionsDlg::UWM_GET_TIMEOUT = ::RegisterWindowMessage(_T("UWM_GET_TIMEOUT-{378232F3-538E-4488-943A-261905D3EADA}"));
+#include "Settings.h"
 
 IMPLEMENT_DYNAMIC(OptionsDlg, CDialog)
 
@@ -20,6 +18,7 @@ void OptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_TXTTIMEOUT, c_txtTimeout);
+    DDX_Control(pDX, IDC_CHKRDPFRIENDLYMETHOD, chkUseRDPFriendlyMethod);
 }
 
 
@@ -34,16 +33,14 @@ END_MESSAGE_MAP()
 BOOL OptionsDlg::OnInitDialog()
 {
     CDialog::OnInitDialog();
+    Settings s;
     c_txtTimeout.SetLimitText(4);
     CString tmpTextTimeoutVal;
-    LRESULT lres;
-    int timeout;
     
-    lres = ::SendMessage(this->GetParent()->m_hWnd, UWM_GET_TIMEOUT, 0, 0);
-    timeout = *(int*)lres;
-    
-    tmpTextTimeoutVal.Format(_T("%d"), timeout);
+    tmpTextTimeoutVal.Format(_T("%d"), s.timeoutInMinutes);
     c_txtTimeout.SetWindowText(tmpTextTimeoutVal);
+    
+    chkUseRDPFriendlyMethod.SetCheck( s.useRDPFriendlyWakeMethod ? BST_CHECKED : BST_UNCHECKED );
     return TRUE;
 }
 
@@ -52,27 +49,35 @@ void OptionsDlg::OnBnClickedOk()
     CString enteredText;
     int numericalValue = 0;
     c_txtTimeout.GetWindowText(enteredText);
-    BOOL validationFailed = FALSE;
+    BOOL validated = TRUE;
     
     if(enteredText.GetLength() == 0 )
-        validationFailed = TRUE;
+        validated = FALSE;
 
     numericalValue = _wtoi(enteredText);
     if( (numericalValue == 0) || (numericalValue > 9999) )
-        validationFailed = TRUE;
+        validated = FALSE;
     
-    if(validationFailed)
+    if(validated)
     {
-        AfxMessageBox(_T("Please enter a valid value. Valid values range from 1 to 9999."), MB_ICONERROR | MB_OK);
+        SaveSettings(numericalValue, chkUseRDPFriendlyMethod.GetCheck() == BST_CHECKED);
+        OnOK();        
     }
     else
     {
-        ::SendMessage(this->GetParent()->m_hWnd, UWM_SET_TIMEOUT, (WPARAM)numericalValue, 0);
-        OnOK();
+        AfxMessageBox(_T("Please enter a valid value. Valid values range from 1 to 9999."), MB_ICONERROR | MB_OK);
     }
 }
 
 void OptionsDlg::OnBnClickedCancel()
 {
     OnCancel();
+}
+
+void OptionsDlg::SaveSettings(int timeout, BOOL RDPFriendlyWakeMethod)
+{
+    Settings s;
+    s.timeoutInMinutes = timeout;
+    s.useRDPFriendlyWakeMethod = RDPFriendlyWakeMethod;
+    s.WriteSettings();
 }

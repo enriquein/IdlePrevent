@@ -23,13 +23,17 @@ Settings::~Settings()
 // want to reload settings from file. 
 void Settings::ReadSettings()
 {
-	iTimeoutInMinutes = (int)GetPrivateProfileInt(_T("IdlePrevent"), _T("TimeoutInMinutes"), 5, iniPath);
+	timeoutInMinutes = (int)GetPrivateProfileInt(_T("IdlePrevent"), _T("TimeoutInMinutes"), 5, iniPath);
+	useRDPFriendlyWakeMethod = (BOOL)GetPrivateProfileInt(_T("IdlePrevent"), _T("UseRDPFriendlyWakeMethod"), FALSE, iniPath);
 }
 
 void Settings::WriteSettings()
 {
     CString buffer;
-    buffer.Format(_T("%d"), iTimeoutInMinutes);
+    buffer.Format(_T("%d"), timeoutInMinutes);
 	WritePrivateProfileString(_T("IdlePrevent"), _T("TimeoutInMinutes"), buffer, iniPath);
+	
+	buffer.Format(_T("%d"), (int)useRDPFriendlyWakeMethod);
+	WritePrivateProfileString(_T("IdlePrevent"), _T("UseRDPFriendlyWakeMethod"), buffer, iniPath);
 }
 

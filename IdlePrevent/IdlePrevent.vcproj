@@ -368,14 +368,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KeyboardEventWakeMethod.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseAndPowerEventWakeMethod.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\OptionsDlg.cpp"
 				>
 			</File>
@@ -438,15 +430,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KeyboardEventWakeMethod.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\CppClasses\CLimitSingleInstance (Proper way made a class)\LimitSingleInstance.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MouseAndPowerEventWakeMethod.h"
 				>
 			</File>
 			<File
@@ -467,10 +451,6 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WakeMethod.h"
 				>
 			</File>
 		</Filter>
