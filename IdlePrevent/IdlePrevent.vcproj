@@ -180,7 +180,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)\"
 			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\$(PlatformName)\int"
 			ConfigurationType="1"
-			UseOfMFC="1"
+			UseOfMFC="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -204,11 +204,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="1"
 				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="2"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -367,6 +368,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\KeyboardEventWakeMethod.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MouseAndPowerEventWakeMethod.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\OptionsDlg.cpp"
 				>
 			</File>
@@ -429,7 +438,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\KeyboardEventWakeMethod.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\CppClasses\CLimitSingleInstance (Proper way made a class)\LimitSingleInstance.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MouseAndPowerEventWakeMethod.h"
 				>
 			</File>
 			<File
@@ -450,6 +467,10 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WakeMethod.h"
 				>
 			</File>
 		</Filter>
