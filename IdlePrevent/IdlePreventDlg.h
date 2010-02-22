@@ -32,6 +32,7 @@ protected:
     LRESULT ShellIcon_Initialize(WPARAM wparam, LPARAM lparam);
     void ShellIcon_Terminate();
     void DoCleanup();
+    void LoadSettings();
 
 // Implementation
 protected:

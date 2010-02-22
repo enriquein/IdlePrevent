@@ -15,12 +15,10 @@ UINT CIdlePreventDlg::UWM_TASKBAR_CREATED = ::RegisterWindowMessage(_T("TaskbarC
 
 CIdlePreventDlg::CIdlePreventDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CIdlePreventDlg::IDD, pParent)
-{
-    Settings s;
+{  
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	isTimerEnabled = FALSE; // Initialize to false since we're not running a timer yet.
-	timeoutValue = s.timeoutInMinutes; 
-	RDPFriendlyWakeEnabled = s.useRDPFriendlyWakeMethod;
+    LoadSettings();
 }
 
 BEGIN_MESSAGE_MAP(CIdlePreventDlg, CDialog)
@@ -43,8 +41,12 @@ LRESULT CIdlePreventDlg::SendWakeEvent(WPARAM wparam, LPARAM lparam)
 	HDESK test = OpenInputDesktop(DF_ALLOWOTHERACCOUNTHOOK, TRUE,DESKTOP_CREATEMENU | DESKTOP_CREATEWINDOW |DESKTOP_ENUMERATE | DESKTOP_HOOKCONTROL |DESKTOP_WRITEOBJECTS | DESKTOP_READOBJECTS |DESKTOP_SWITCHDESKTOP |GENERIC_WRITE);
 	if (test != NULL)
 	{
-        if(RDPFriendlyWakeEnabled)
+        if(RDPFriendlyWakeEnabled) 
         {      
+            keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0);
+        }
+        else
+        {
             INPUT mouseInput[1];
             mouseInput[0].mi.dx = 0;
             mouseInput[0].mi.dy = 0;
@@ -54,10 +56,6 @@ LRESULT CIdlePreventDlg::SendWakeEvent(WPARAM wparam, LPARAM lparam)
             mouseInput[0].mi.dwExtraInfo = NULL;
             SendInput(1, mouseInput, sizeof(mouseInput));
             SetThreadExecutionState(ES_DISPLAY_REQUIRED);
-        }
-        else
-        {
-            keybd_event(VK_RSHIFT,0xB6, KEYEVENTF_KEYUP,  0);
         }
 	}
 	CloseDesktop(test);
@@ -69,6 +67,7 @@ void CIdlePreventDlg::OnTrayOptions()
     OptionsDlg o((CWnd*) this);
     ToggleTrayMenu(FALSE);
     o.DoModal();
+    LoadSettings();
     if(isTimerEnabled)
     {
         EnableTimer(TRUE); // Refreshing the timeout value.
@@ -220,4 +219,11 @@ void CIdlePreventDlg::OnWindowPosChanging(WINDOWPOS* lpwndpos)
 {
     lpwndpos->flags &= ~SWP_SHOWWINDOW;
     CDialog::OnWindowPosChanging(lpwndpos);
+}
+
+void CIdlePreventDlg::LoadSettings()
+{
+    Settings s;
+ 	timeoutValue = s.timeoutInMinutes; 
+	RDPFriendlyWakeEnabled = s.useRDPFriendlyWakeMethod; 
 }
