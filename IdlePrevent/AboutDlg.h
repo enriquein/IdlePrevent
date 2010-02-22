@@ -1,4 +1,5 @@
 #pragma once
+#include "afxwin.h"
 
 
 // AboutDlg dialog
@@ -21,4 +22,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+public:
+    CString lblAppInfoStr;
 };

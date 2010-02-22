@@ -108,49 +108,10 @@ CAPTION "IdlePrevent"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Close",IDOK,76,60,50,14
-    LTEXT           "You are using IdlePrevent version 1.2 (32-bit).",IDC_LBLMAININFO,7,7,188,8
+    LTEXT           "You are using IdlePrevent.",IDC_LBLMAININFO,7,7,188,8
     LTEXT           "For support, email enriquein@gmail.com",IDC_STATIC,7,20,146,8
     LTEXT           "This program is free for use for any purpose.",IDC_STATIC,7,33,145,8
     LTEXT           "Source code is available at http://PersistedThoughts.com",IDC_STATIC,7,46,184,8
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,0,0
- PRODUCTVERSION 1,1,0,0
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904e4"
-        BEGIN
-            VALUE "CompanyName", "Persisted Thoughts"
-            VALUE "FileDescription", "Idle Prevent"
-            VALUE "FileVersion", "1.1.0.0"
-            VALUE "InternalName", "IdlePrevent.exe"
-            VALUE "LegalCopyright", "(C) 2009 Persisted Thoughts"
-            VALUE "OriginalFilename", "IdlePrevent.exe"
-            VALUE "ProductName", "Idle Prevent"
-            VALUE "ProductVersion", "1.1.0.0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1252
-    END
 END
 
 

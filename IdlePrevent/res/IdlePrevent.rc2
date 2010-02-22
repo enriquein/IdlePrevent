@@ -11,3 +11,41 @@
 // Add manually edited resources here...
 
 /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+#include "VersionNo.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION FILEVER
+ PRODUCTVERSION PRODUCTVER
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "Persisted Thoughts"
+            VALUE "FileDescription", "Idle Prevent"
+            VALUE "FileVersion", STRFILEVER
+            VALUE "InternalName", "IdlePrevent.exe"
+            VALUE "LegalCopyright", "(C) 2009 Persisted Thoughts"
+            VALUE "OriginalFilename", "IdlePrevent.exe"
+            VALUE "ProductName", "Idle Prevent"
+            VALUE "ProductVersion", STRPRODUCTVER
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END

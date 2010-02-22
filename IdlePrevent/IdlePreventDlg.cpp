@@ -4,6 +4,7 @@
 #include "Settings.h"
 #include "OptionsDlg.h"
 #include "AboutDlg.h"
+#include "VersionNo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -171,7 +172,7 @@ LRESULT CIdlePreventDlg::ShellIcon_Initialize(WPARAM wparam, LPARAM lparam)
 	ni.uID = 1;
 	ni.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     ni.uCallbackMessage = UWM_SHELLICON_MSG;
-    ttipText = _T("IdlePrevent 1.2");
+    ttipText.Format(_T("IdlePrevent %s"), _T(STRAPPVER));
     _tcscpy_s(ni.szTip, ttipText);
 	ni.hIcon = m_hIcon;
 	

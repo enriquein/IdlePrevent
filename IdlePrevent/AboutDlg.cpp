@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "IdlePrevent.h"
 #include "AboutDlg.h"
+#include "VersionNo.h"
 
 
 // AboutDlg dialog
@@ -12,6 +13,7 @@ IMPLEMENT_DYNAMIC(AboutDlg, CDialog)
 
 AboutDlg::AboutDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(AboutDlg::IDD, pParent)
+    , lblAppInfoStr(_T(""))
 {
 
 }
@@ -22,7 +24,8 @@ AboutDlg::~AboutDlg()
 
 void AboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+    CDialog::DoDataExchange(pDX);
+    DDX_Text(pDX, IDC_LBLMAININFO, lblAppInfoStr);
 }
 
 BOOL AboutDlg::OnInitDialog()
@@ -35,7 +38,8 @@ BOOL AboutDlg::OnInitDialog()
 	    cpuBits = _T("(32-bit)");
 	#endif
 	
-	labelText.Format(_T("You are using idle prevent version 1.0 %s."), cpuBits);
+	lblAppInfoStr.Format(_T("You are using IdlePrevent version %s %s."), _T(STRAPPVER), cpuBits);
+	UpdateData(FALSE);
 	return TRUE;
 }
 
